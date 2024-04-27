@@ -1,0 +1,228 @@
+#include <SFML/Graphics.hpp>
+#include "main.h"
+#include <string.h>
+#include <thread>
+#include <cstdio>
+// https://pixspy.com/
+
+Ground *ground_array;
+int ground_array_size = 16;
+// realocate the ground array and add new ground
+
+void add_ground(sf::Texture &ground_texture, int x, int y)
+{
+    ground_array = (Ground *)realloc(ground_array, sizeof(Ground) * (ground_array_size + 1));
+    Ground ground(x, y, &ground_texture);
+    ground.set_position(x, y);
+    memcpy(&ground_array[ground_array_size], &ground, sizeof(Ground));
+    ground_array_size++;
+}
+
+void create_ground(sf::Texture &ground_texture)
+{
+    for (int i = 0; i < 16; i++)
+    {
+        Ground ground(i * 64, 800 - 64, &ground_texture);
+        ground.set_position(i * 64, 800 - 64);
+        memcpy(&ground_array[i], &ground, sizeof(Ground));
+    }
+}
+
+bool check_Y_collision(float x, float y, int width, int height)
+{
+    // check Y
+    for (int i = 0; i < ground_array_size; i++)
+    {
+        if (sf::FloatRect(x, y, width, height).intersects(ground_array[i].sprite.getGlobalBounds()))
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool check_X_collision(float x, float y, int width, int height)
+{
+    // check X
+    for (int i = 0; i < ground_array_size; i++)
+    {
+        if (sf::FloatRect(x, y, width, height).intersects(ground_array[i].sprite.getGlobalBounds()))
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+void jump(Player &player)
+{
+    // create a thread to make the player jump
+    std::thread t1([&player]()
+                   {
+                    sf::Clock clock;
+                    clock.restart();
+
+                    while(clock.getElapsedTime().asSeconds() < 0.35)
+                    {
+                        if(check_Y_collision(player.x, player.y-2.5, player.width, player.height) == true)
+                        {
+                            break;
+                        }
+                        player.y -= 2.5;
+                        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+                    } 
+                    return; });
+    t1.detach();
+    return;
+}
+
+void player_move(Player &player, float dt)
+{
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q))
+    {
+        if (check_X_collision(player.x - (100 * dt * 2), player.y, player.width, player.height - 5) == false)
+        {
+            player.x -= 100 * dt;
+            player.moving = 1;
+        }
+    }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
+    {
+        if (check_X_collision(player.x + (100 * dt * 2), player.y, player.width, player.height - 5) == false)
+        {
+            player.x += 100 * dt;
+            player.moving = 2;
+        }
+    }
+
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
+    {
+        if (player.jumping == 0)
+        {
+            player.jumping = 1;
+            jump(player);
+        }
+    }
+
+    if (check_Y_collision(player.x, player.y, player.width, player.height) == false)
+    {
+        player.y += 100 * dt;
+        player.jumping = 1;
+    }
+    else
+    {
+        player.jumping = 0;
+    }
+}
+
+void change_sprite(Player &player)
+{
+    if (player.moving == 0)
+    {
+        player.sprite.setTexture(player.player_texture_idle);
+
+        player.animation_frame++;
+        if (player.animation_frame >= 10)
+            player.animation_frame = 0;
+        player.sprite.setTextureRect(sf::IntRect(24 * (player.animation_frame), 0, 24, 32));
+    }
+    else
+    {
+        player.sprite.setTexture(player.player_texture_walking);
+        player.animation_frame++;
+        if (player.animation_frame >= 11)
+            player.animation_frame = 0;
+
+        if (player.moving == 1)
+        {
+            player.sprite.setScale(-3, 3);
+            player.left = 1;
+        }
+        else
+        {
+            player.sprite.setScale(3, 3);
+            player.left = 0;
+        }
+
+        player.sprite.setTextureRect(sf::IntRect(22 * (player.animation_frame), 0, 22, 32));
+    }
+}
+
+int main()
+{
+    sf::RenderWindow window(
+        sf::VideoMode(1024, 800),
+        "Nome do Jogo");
+    window.setFramerateLimit(60);
+
+    sf::CircleShape circle_player(4.f);
+
+    sf::Texture player_texture_walking;
+    player_texture_walking.loadFromFile("assets/Skeleton Walk.png");
+    sf::Texture player_texture_idle;
+    player_texture_idle.loadFromFile("assets/Skeleton Idle.png");
+
+    Player player(&player_texture_idle, &player_texture_walking);
+
+    sf::Texture ground_texture;
+    ground_texture.loadFromFile("assets/mainlev_build.png");
+    ground_array = (Ground *)malloc(sizeof(Ground) * 16);
+    create_ground(ground_texture);
+
+    add_ground(ground_texture, 512, 800 - 64 - 64);
+    add_ground(ground_texture, 512, 800 - 64 - 64 - 64);
+    // add more to make the map
+    add_ground(ground_texture, 512 + 64, 800 - 64 - 64);
+    add_ground(ground_texture, 512 + 64, 800 - 64 - 64 - 64);
+    add_ground(ground_texture, 512 + 64 + 64, 800 - 64 - 64);
+    add_ground(ground_texture, 512 + 64 + 64, 800 - 64 - 64 - 64);
+    add_ground(ground_texture, 512 + 64 + 64 + 64, 800 - 64 - 64);
+    add_ground(ground_texture, 512 + 64 + 64 + 64, 800 - 64 - 64 - 64 - 64 - 64);
+
+    sf::Clock clock;
+    clock.restart();
+    sf::Clock delta_clock;
+
+    while (window.isOpen())
+    {
+        float dt = delta_clock.restart().asSeconds();
+
+        sf::Event event;
+        while (window.pollEvent(event))
+            if (event.type == sf::Event::Closed)
+                window.close();
+
+        player.moving = 0;
+
+        player_move(player, dt);
+
+        // every 800mills change the sprite
+        if (clock.getElapsedTime().asMilliseconds() > 100)
+        {
+            clock.restart();
+            change_sprite(player);
+        }
+
+        // make the sprite follow the player face left or not
+        if (player.left == 0)
+        {
+            player.sprite.setPosition(player.x, player.y);
+        }
+        else
+        {
+            player.sprite.setPosition(player.x + player.width, player.y);
+        }
+
+        circle_player.setPosition(player.x, player.y); // para remover
+
+        window.clear();
+        window.draw(player.sprite);
+        for (int i = 0; i < ground_array_size; i++)
+        {
+            window.draw(ground_array[i].sprite);
+        }
+        window.draw(circle_player);
+        window.display();
+    }
+    return 0;
+}
