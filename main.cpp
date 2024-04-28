@@ -234,6 +234,8 @@ int main()
         "Nome do Jogo");
     window.setFramerateLimit(60);
 
+    float time_to_live_player = 90;
+
     sf::CircleShape circle_player(4.f);
 
     Player player = start_player();
@@ -255,10 +257,20 @@ int main()
     add_ground(ground_texture, 512 + 64 + 64 + 64, 800 - 64 - 64);
     add_ground(ground_texture, 512 + 64 + 64 + 64, 800 - 64 - 64 - 64 - 64 - 64);
 
+    sf::Font font;
+    font.loadFromFile("assets/Arial.ttf");
+    sf::Text text;
+    text.setFont(font);
+    text.setCharacterSize(24);
+    text.setFillColor(sf::Color::Red);
+    text.setPosition(0, 0);
+
     sf::Clock clock;
     clock.restart();
     sf::Clock delta_clock;
+    sf::Clock time_life;
 
+    time_life.restart();
     while (window.isOpen())
     {
         float dt = delta_clock.restart().asSeconds();
@@ -309,6 +321,16 @@ int main()
 
         circle_player.setPosition(player.x, player.y); // para remover
 
+        // write time life on the screen
+
+        std::string timeString = std::to_string(time_to_live_player - time_life.getElapsedTime().asSeconds());
+        size_t dotPos = timeString.find('.');
+        if (dotPos != std::string::npos && timeString.length() - dotPos > 2)
+        {
+            timeString = timeString.substr(0, dotPos + 3);
+        }
+        text.setString("Time: " + timeString);
+
         window.clear();
         for (int i = 0; i < ground_array_size; i++)
         {
@@ -317,6 +339,7 @@ int main()
         window.draw(circle_player);
         window.draw(player.sprite);
         window.draw(enemy.sprite);
+        window.draw(text);
         window.display();
     }
     return 0;
