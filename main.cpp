@@ -115,7 +115,39 @@ void player_move(Player &player, float dt)
     }
 }
 
-void change_sprite(Player &player)
+void enemy_move(Enemy &enemy, float dt)
+{
+    if (check_Y_collision(enemy.x - 40 + enemy.offset, enemy.y, enemy.width, enemy.height) == false)
+    {
+        enemy.y += 100 * dt;
+    }
+    else
+    {
+        if (enemy.left == 0)
+        {
+            enemy.x += 50 * dt;
+            enemy.walk_left_right += 50 * dt;
+            if (enemy.walk_left_right >= 200)
+            {
+                enemy.left = 1;
+                enemy.walk_left_right = 0;
+                enemy.offset = 40;
+            }
+        }
+        else
+        {
+            enemy.x -= 50 * dt;
+            enemy.walk_left_right += 50 * dt;
+            if (enemy.walk_left_right >= 200)
+            {
+                enemy.left = 0;
+                enemy.walk_left_right = 0;
+                enemy.offset = 0;
+            }
+        }
+    }
+}
+void change_sprite_player(Player &player)
 {
     if (player.moving == 0)
     {
@@ -148,6 +180,53 @@ void change_sprite(Player &player)
     }
 }
 
+void change_sprite_enemy(Enemy &enemy)
+{
+    enemy.animation_frame++;
+    if (enemy.animation_frame >= 6)
+        enemy.animation_frame = 0;
+
+    if (enemy.left == 0)
+    {
+        enemy.sprite.setScale(-4, 4);
+    }
+    else
+    {
+        enemy.sprite.setScale(4, 4);
+    }
+    enemy.sprite.setTextureRect(sf::IntRect(9 + (32 * enemy.animation_frame), 56, 18, 8));
+}
+
+Player start_player()
+{
+    sf::Texture player_texture_walking;
+    player_texture_walking.loadFromFile("assets/Skeleton Walk.png");
+    sf::Texture player_texture_idle;
+    player_texture_idle.loadFromFile("assets/Skeleton Idle.png");
+
+    Player player(&player_texture_idle, &player_texture_walking);
+    return player;
+}
+
+Enemy start_enemy(float x, float y)
+{
+
+    sf::Texture enemy_texture;
+    enemy_texture.loadFromFile("assets/aranha.png");
+    Enemy enemy(&enemy_texture, x, y);
+
+    return enemy;
+}
+
+bool check_enemy_player_collision(Player &player, Enemy &enemy)
+{
+    if (sf::FloatRect(player.x, player.y, player.width, player.height).intersects(sf::FloatRect(enemy.x, enemy.y, 1, enemy.height)))
+    {
+        return true;
+    }
+    return false;
+}
+
 int main()
 {
     sf::RenderWindow window(
@@ -157,12 +236,9 @@ int main()
 
     sf::CircleShape circle_player(4.f);
 
-    sf::Texture player_texture_walking;
-    player_texture_walking.loadFromFile("assets/Skeleton Walk.png");
-    sf::Texture player_texture_idle;
-    player_texture_idle.loadFromFile("assets/Skeleton Idle.png");
+    Player player = start_player();
 
-    Player player(&player_texture_idle, &player_texture_walking);
+    Enemy enemy = start_enemy(200, 200);
 
     sf::Texture ground_texture;
     ground_texture.loadFromFile("assets/mainlev_build.png");
@@ -195,15 +271,18 @@ int main()
         player.moving = 0;
 
         player_move(player, dt);
+        enemy_move(enemy, dt);
 
         // every 800mills change the sprite
         if (clock.getElapsedTime().asMilliseconds() > 100)
         {
             clock.restart();
-            change_sprite(player);
+            change_sprite_player(player);
+            change_sprite_enemy(enemy);
         }
 
-        // make the sprite follow the player face left or not
+        // move every sprite
+        //  make the sprite follow the player face left or not
         if (player.left == 0)
         {
             player.sprite.setPosition(player.x, player.y);
@@ -213,15 +292,31 @@ int main()
             player.sprite.setPosition(player.x + player.width, player.y);
         }
 
+        if (enemy.left == 0)
+        {
+            enemy.sprite.setPosition(enemy.x, enemy.y);
+        }
+        else
+        {
+            enemy.sprite.setPosition(enemy.x - enemy.offset, enemy.y);
+        }
+
+        if (check_enemy_player_collision(player, enemy) == true)
+        {
+            player.x = 0;
+            player.y = 0;
+        }
+
         circle_player.setPosition(player.x, player.y); // para remover
 
         window.clear();
-        window.draw(player.sprite);
         for (int i = 0; i < ground_array_size; i++)
         {
             window.draw(ground_array[i].sprite);
         }
         window.draw(circle_player);
+        window.draw(player.sprite);
+        window.draw(enemy.sprite);
         window.display();
     }
     return 0;

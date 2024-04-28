@@ -1,4 +1,5 @@
 #include <string>
+#include <cstring>
 #include <SFML/Graphics.hpp>
 
 class Player
@@ -27,17 +28,18 @@ private:
 // Constructor implementation
 Player::Player(sf::Texture *player_texture_idlee, sf::Texture *player_texture_walkinge)
 {
+    player_texture_idle = *player_texture_idlee;
+    player_texture_walking = *player_texture_walkinge;
+
     x = 500;
     y = 500;
     animation_frame = 0;
-    sprite.setTexture(*player_texture_idlee);
+    sprite.setTexture(player_texture_idle);
     sprite.setPosition(800, 800);
     sprite.setTextureRect(sf::IntRect(0, 0, 24, 32));
     sprite.setScale(3, 3);
     width = 24 * 3;
     height = 32 * 3;
-    player_texture_idle = *player_texture_idlee;
-    player_texture_walking = *player_texture_walkinge;
 }
 
 // Destructor implementation
@@ -51,7 +53,6 @@ class Ground
 public:
     float x, y;
     sf::Sprite sprite;
-    sf::Texture ground_texture;
     int width = 64;
     int height = 64;
     // Constructor
@@ -95,9 +96,11 @@ public:
     int left = 0;
     int width = 0;
     int height = 0;
+    float walk_left_right = 0;
+    float offset = 0;
     sf::Texture enemy_texture_walking;
     // Constructor
-    Enemy(sf::Texture *enemy_texture_walkinge);
+    Enemy(sf::Texture *enemy_texture_walkinge, float x, float y);
 
     // Destructor
     ~Enemy();
@@ -107,18 +110,18 @@ private:
 
 // Constructor implementation
 
-Enemy::Enemy(sf::Texture *enemy_texture_walkinge)
+Enemy::Enemy(sf::Texture *enemy_texture_walkinge, float xx, float yy)
 {
-    x = 500;
-    y = 500;
+    x = xx;
+    y = yy;
     animation_frame = 0;
-    sprite.setTexture(*enemy_texture_walkinge);
-    sprite.setPosition(800, 800);
-    sprite.setTextureRect(sf::IntRect(0, 0, 24, 32));
-    sprite.setScale(3, 3);
-    width = 24 * 3;
-    height = 32 * 3;
     enemy_texture_walking = *enemy_texture_walkinge;
+    sprite.setTexture(enemy_texture_walking);
+    sprite.setPosition(x, y);
+    sprite.setTextureRect(sf::IntRect(10, 24, 18, 8));
+    sprite.setScale(4, 4);
+    width = 18 * 4;
+    height = 8 * 4;
 }
 
 // Destructor implementation
