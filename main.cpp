@@ -3,10 +3,14 @@
 #include <string.h>
 #include <thread>
 #include <cstdio>
+#include <iostream>
 // https://pixspy.com/
 
 Ground *ground_array;
+Enemy *enemy_array;
 int ground_array_size = 16;
+int enemy_count = 0;
+int current_level = 1;
 // realocate the ground array and add new ground
 
 void add_ground(sf::Texture &ground_texture, int x, int y)
@@ -18,8 +22,20 @@ void add_ground(sf::Texture &ground_texture, int x, int y)
     ground_array_size++;
 }
 
+void add_enemy(sf::Texture &enemy_texture, int x, int y, int ani, int walk)
+{
+    enemy_array = (Enemy *)realloc(enemy_array, sizeof(Enemy) * (enemy_count + 1));
+    Enemy enemy(&enemy_texture, x, y);
+    enemy.animation_frame = ani;
+    enemy.walk_left_right = walk;
+    memcpy(&enemy_array[enemy_count], &enemy, sizeof(Enemy));
+    enemy_count++;
+}
+
 void create_ground(sf::Texture &ground_texture)
 {
+    ground_array = (Ground *)malloc(sizeof(Ground) * 16);
+
     for (int i = 0; i < 16; i++)
     {
         Ground ground(i * 64, 800 - 64, &ground_texture);
@@ -28,22 +44,8 @@ void create_ground(sf::Texture &ground_texture)
     }
 }
 
-bool check_Y_collision(float x, float y, int width, int height)
+bool check_collision(float x, float y, int width, int height)
 {
-    // check Y
-    for (int i = 0; i < ground_array_size; i++)
-    {
-        if (sf::FloatRect(x, y, width, height).intersects(ground_array[i].sprite.getGlobalBounds()))
-        {
-            return true;
-        }
-    }
-    return false;
-}
-
-bool check_X_collision(float x, float y, int width, int height)
-{
-    // check X
     for (int i = 0; i < ground_array_size; i++)
     {
         if (sf::FloatRect(x, y, width, height).intersects(ground_array[i].sprite.getGlobalBounds()))
@@ -61,13 +63,20 @@ void jump(Player &player)
                    {
                     sf::Clock clock;
                     clock.restart();
-
+                    int machado_off = 5 * 4;
                     while(clock.getElapsedTime().asSeconds() < 0.35)
-                    {
-                        if(check_Y_collision(player.x, player.y-2.5, player.width, player.height) == true)
-                        {
-                            break;
+                    {   if(player.left == 0){
+                            if(check_collision(player.x, player.y-2.5, player.width-machado_off, player.height) == true)
+                            {
+                                break;
+                            }
+                        }else{
+                            if(check_collision(player.x + machado_off, player.y-2.5, player.width-machado_off, player.height) == true)
+                            {
+                                break;
+                            }
                         }
+                        
                         player.y -= 2.5;
                         std::this_thread::sleep_for(std::chrono::milliseconds(10));
                     } 
@@ -78,20 +87,32 @@ void jump(Player &player)
 
 void player_move(Player &player, float dt)
 {
+    int machado_off = 5 * 4;
+
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q))
     {
-        if (check_X_collision(player.x - (100 * dt * 2), player.y, player.width, player.height - 5) == false)
+        if (player.last_direction == 2)
+        {
+            player.x -= machado_off;
+        }
+        if (check_collision(player.x - (100 * dt * 2) + machado_off, player.y, player.width - machado_off, player.height - 5) == false)
         {
             player.x -= 100 * dt;
             player.moving = 1;
+            player.last_direction = 1;
         }
     }
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
     {
-        if (check_X_collision(player.x + (100 * dt * 2), player.y, player.width, player.height - 5) == false)
+        if (player.last_direction == 1)
+        {
+            player.x += machado_off;
+        }
+        if (check_collision(player.x + (100 * dt * 2), player.y, player.width - machado_off, player.height - 5) == false)
         {
             player.x += 100 * dt;
             player.moving = 2;
+            player.last_direction = 2;
         }
     }
 
@@ -104,20 +125,35 @@ void player_move(Player &player, float dt)
         }
     }
 
-    if (check_Y_collision(player.x, player.y, player.width, player.height) == false)
+    if (player.left == 0)
     {
-        player.y += 100 * dt;
-        player.jumping = 1;
+        if (check_collision(player.x, player.y, player.width - machado_off, player.height) == false) // 5*4 = machado offset
+        {
+            player.y += 100 * dt;
+            player.jumping = 1;
+        }
+        else
+        {
+            player.jumping = 0;
+        }
     }
     else
     {
-        player.jumping = 0;
+        if (check_collision(player.x + machado_off, player.y, player.width - machado_off, player.height) == false) // 5*4 = machado offset
+        {
+            player.y += 100 * dt;
+            player.jumping = 1;
+        }
+        else
+        {
+            player.jumping = 0;
+        }
     }
 }
 
 void enemy_move(Enemy &enemy, float dt)
 {
-    if (check_Y_collision(enemy.x - 40 + enemy.offset, enemy.y, enemy.width, enemy.height) == false)
+    if (check_collision(enemy.x - 40 + enemy.offset, enemy.y, enemy.width, enemy.height) == false)
     {
         enemy.y += 100 * dt;
     }
@@ -204,7 +240,7 @@ Player start_player()
     sf::Texture player_texture_idle;
     player_texture_idle.loadFromFile("assets/Skeleton Idle.png");
 
-    Player player(&player_texture_idle, &player_texture_walking);
+    Player player(&player_texture_idle, &player_texture_walking, 0, 0);
     return player;
 }
 
@@ -227,6 +263,51 @@ bool check_enemy_player_collision(Player &player, Enemy &enemy)
     return false;
 }
 
+void level_load1(Player &player, sf::Texture &ground_texture, sf::Texture &enemy_texture)
+{
+    int starting_pos[2] = {500, 500};
+    player.x = starting_pos[0];
+    player.y = starting_pos[1];
+
+    add_ground(ground_texture, 512, 800 - 64 - 64);
+    add_ground(ground_texture, 512, 800 - 64 - 64 - 64);
+    // add more to make the map
+    add_ground(ground_texture, 512 + 64, 800 - 64 - 64);
+    add_ground(ground_texture, 512 + 64, 800 - 64 - 64 - 64);
+    add_ground(ground_texture, 512 + 64 + 64, 800 - 64 - 64);
+    add_ground(ground_texture, 512 + 64 + 64, 800 - 64 - 64 - 64);
+    add_ground(ground_texture, 512 + 64 + 64 + 64, 800 - 64 - 64);
+    add_ground(ground_texture, 320, 640);
+    add_ground(ground_texture, 320, 704);
+
+    add_enemy(enemy_texture, 200, 200, 0, 0);
+    add_enemy(enemy_texture, 100, 200, 5, 30);
+    current_level = 1;
+}
+
+void level_load2(Player &player, sf::Texture &ground_texture, sf::Texture &enemy_texture)
+{
+
+    int starting_pos[2] = {0, 0};
+    player.x = starting_pos[0];
+    player.y = starting_pos[1];
+
+    add_ground(ground_texture, 0, 192);
+    add_ground(ground_texture, 64, 192);
+    add_ground(ground_texture, 128, 192);
+    add_ground(ground_texture, 64 * 4, 256);
+    add_ground(ground_texture, 64 * 5, 256);
+    add_ground(ground_texture, 64 * 6, 256);
+    add_ground(ground_texture, 64 * 7, 256);
+    add_ground(ground_texture, 64 * 8, 256);
+    add_ground(ground_texture, 64 * 9, 256);
+    add_ground(ground_texture, 64 * 10, 256);
+
+    add_enemy(enemy_texture, 448, 170, 0, 0);
+
+    current_level = 2;
+}
+
 int main()
 {
     sf::RenderWindow window(
@@ -240,22 +321,13 @@ int main()
 
     Player player = start_player();
 
-    Enemy enemy = start_enemy(200, 200);
-
+    sf::Texture enemy_texture;
     sf::Texture ground_texture;
-    ground_texture.loadFromFile("assets/mainlev_build.png");
-    ground_array = (Ground *)malloc(sizeof(Ground) * 16);
-    create_ground(ground_texture);
 
-    add_ground(ground_texture, 512, 800 - 64 - 64);
-    add_ground(ground_texture, 512, 800 - 64 - 64 - 64);
-    // add more to make the map
-    add_ground(ground_texture, 512 + 64, 800 - 64 - 64);
-    add_ground(ground_texture, 512 + 64, 800 - 64 - 64 - 64);
-    add_ground(ground_texture, 512 + 64 + 64, 800 - 64 - 64);
-    add_ground(ground_texture, 512 + 64 + 64, 800 - 64 - 64 - 64);
-    add_ground(ground_texture, 512 + 64 + 64 + 64, 800 - 64 - 64);
-    add_ground(ground_texture, 512 + 64 + 64 + 64, 800 - 64 - 64 - 64 - 64 - 64);
+    enemy_texture.loadFromFile("assets/aranha.png");
+
+    ground_texture.loadFromFile("assets/mainlev_build.png");
+    create_ground(ground_texture);
 
     sf::Font font;
     font.loadFromFile("assets/Arial.ttf");
@@ -271,6 +343,8 @@ int main()
     sf::Clock time_life;
 
     time_life.restart();
+
+    level_load1(player, ground_texture, enemy_texture);
     while (window.isOpen())
     {
         float dt = delta_clock.restart().asSeconds();
@@ -283,14 +357,19 @@ int main()
         player.moving = 0;
 
         player_move(player, dt);
-        enemy_move(enemy, dt);
+
+        for (int i = 0; i < enemy_count; i++)
+        {
+            enemy_move(enemy_array[i], dt);
+        }
 
         // every 800mills change the sprite
         if (clock.getElapsedTime().asMilliseconds() > 100)
         {
             clock.restart();
             change_sprite_player(player);
-            change_sprite_enemy(enemy);
+            for (int i = 0; i < enemy_count; i++)
+                change_sprite_enemy(enemy_array[i]);
         }
 
         // move every sprite
@@ -304,19 +383,25 @@ int main()
             player.sprite.setPosition(player.x + player.width, player.y);
         }
 
-        if (enemy.left == 0)
+        for (int i = 0; i < enemy_count; i++)
         {
-            enemy.sprite.setPosition(enemy.x, enemy.y);
-        }
-        else
-        {
-            enemy.sprite.setPosition(enemy.x - enemy.offset, enemy.y);
+            if (enemy_array[i].left == 0)
+            {
+                enemy_array[i].sprite.setPosition(enemy_array[i].x, enemy_array[i].y);
+            }
+            else
+            {
+                enemy_array[i].sprite.setPosition(enemy_array[i].x - enemy_array[i].offset, enemy_array[i].y);
+            }
         }
 
-        if (check_enemy_player_collision(player, enemy) == true)
+        for (int i = 0; i < enemy_count; i++)
         {
-            player.x = 0;
-            player.y = 0;
+            if (check_enemy_player_collision(player, enemy_array[i]) == true) // morreuuu
+            {
+                player.x = 0;
+                player.y = 0;
+            }
         }
 
         circle_player.setPosition(player.x, player.y); // para remover
@@ -331,14 +416,21 @@ int main()
         }
         text.setString("Time: " + timeString);
 
+        sf::Vector2i cursorPosition = sf::Mouse::getPosition(window);
+        printf("X: %d Y: %d\n", cursorPosition.x / 64 * 64, cursorPosition.y / 64 * 64);
+
+        // DRAW
         window.clear();
         for (int i = 0; i < ground_array_size; i++)
         {
             window.draw(ground_array[i].sprite);
         }
+        for (int i = 0; i < enemy_count; i++)
+        {
+            window.draw(enemy_array[i].sprite);
+        }
         window.draw(circle_player);
         window.draw(player.sprite);
-        window.draw(enemy.sprite);
         window.draw(text);
         window.display();
     }
