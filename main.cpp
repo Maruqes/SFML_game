@@ -84,7 +84,7 @@ bool check_atack_enemies(Player &player, Enemy &enemy)
 
     if (player.left == 0)
     {
-        if (sf::FloatRect(player.x, player.y, player.width, player.height).intersects(sf::FloatRect(enemy.x, enemy.y, enemy.width, enemy.height)))
+        if (sf::FloatRect(player.x + player.width, player.y, player.width, player.height).intersects(sf::FloatRect(enemy.x, enemy.y, enemy.width, enemy.height)))
         {
             enemy.dead = true;
             return true;
@@ -92,23 +92,13 @@ bool check_atack_enemies(Player &player, Enemy &enemy)
     }
     else
     {
-        if (enemy.left == 0)
+        if (sf::FloatRect(player.x, player.y, player.width, player.height).intersects(sf::FloatRect(enemy.x, enemy.y, enemy.width, enemy.height)))
         {
-            if (sf::FloatRect(player.x + 30, player.y, player.width, player.height).intersects(sf::FloatRect(enemy.x, enemy.y, enemy.width, enemy.height)))
-            {
-                enemy.dead = true;
-                return true;
-            }
-        }
-        else
-        {
-            if (sf::FloatRect(player.x + 30, player.y, player.width, player.height).intersects(sf::FloatRect(enemy.x + enemy.width, enemy.y, enemy.width, enemy.height)))
-            {
-                enemy.dead = true;
-                return true;
-            }
+            enemy.dead = true;
+            return true;
         }
     }
+
     return false;
 }
 
@@ -159,7 +149,7 @@ void atack(Player &player)
                             break;
                         }
                     }
-                    while(clock.getElapsedTime().asSeconds() < 2)
+                    while(clock.getElapsedTime().asSeconds() < 0.3)
                     {
                         player.time_to_atack_again = clock.getElapsedTime().asSeconds();
                         std::this_thread::sleep_for(std::chrono::milliseconds(10)); 
@@ -585,8 +575,8 @@ int main()
         }
         text.setString("Time: " + timeString);
 
-        sf::Vector2i cursorPosition = sf::Mouse::getPosition(window);
-        printf("X: %d Y: %d\n", cursorPosition.x / 48 * 48, cursorPosition.y / 48 * 48);
+        // sf::Vector2i cursorPosition = sf::Mouse::getPosition(window);
+        // printf("X: %d Y: %d\n", cursorPosition.x / 48 * 48, cursorPosition.y / 48 * 48);
 
         // DRAW
         window.clear();
