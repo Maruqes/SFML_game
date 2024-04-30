@@ -8,8 +8,10 @@
 
 Ground *ground_array;
 Enemy *enemy_array;
-int ground_array_size = 16;
+Star *star_array;
+int ground_array_size = 0;
 int enemy_count = 0;
+int star_count = 0;
 int current_level = 1;
 // realocate the ground array and add new ground
 
@@ -32,16 +34,13 @@ void add_enemy(sf::Texture &enemy_texture, int x, int y, int ani, int walk)
     enemy_count++;
 }
 
-void create_ground(sf::Texture &ground_texture)
+void add_star(sf::Texture &star_texture, int x, int y)
 {
-    ground_array = (Ground *)malloc(sizeof(Ground) * 16);
-
-    for (int i = 0; i < 16; i++)
-    {
-        Ground ground(i * 64, 800 - 64, &ground_texture);
-        ground.set_position(i * 64, 800 - 64);
-        memcpy(&ground_array[i], &ground, sizeof(Ground));
-    }
+    star_array = (Star *)realloc(star_array, sizeof(Star) * (star_count + 1));
+    Star star(x, y, &star_texture);
+    star.set_position(x, y);
+    memcpy(&star_array[star_count], &star, sizeof(Star));
+    star_count++;
 }
 
 bool check_collision(float x, float y, int width, int height)
@@ -52,6 +51,24 @@ bool check_collision(float x, float y, int width, int height)
         {
             return true;
         }
+    }
+    return false;
+}
+
+bool check_enemy_player_collision(Player &player, Enemy &enemy)
+{
+    if (sf::FloatRect(player.x, player.y, player.width, player.height).intersects(sf::FloatRect(enemy.x, enemy.y, 1, enemy.height)))
+    {
+        return true;
+    }
+    return false;
+}
+
+bool check_colistion_player_star(Player &player, Star &star)
+{
+    if (sf::FloatRect(player.x, player.y, player.width, player.height).intersects(star.sprite.getGlobalBounds()))
+    {
+        return true;
     }
     return false;
 }
@@ -233,6 +250,17 @@ void change_sprite_enemy(Enemy &enemy)
     enemy.sprite.setTextureRect(sf::IntRect(9 + (32 * enemy.animation_frame), 56, 18, 8));
 }
 
+void change_sprite_star(Star &star)
+{
+    star.animation_frame++;
+    if (star.animation_frame >= 26) // 13*2
+        star.animation_frame = 0;
+
+    star.sprite.setTextureRect(sf::IntRect(0 + (32 * (star.animation_frame / 2)), 0, 32, 32));
+
+    // nesta funcao tenho 13 frames, multiplico por 2 para ter 26 frames e ficar a animacoa mais lenta TER EM ATENCAO AO star.animation_frame / 2
+}
+
 Player start_player()
 {
     sf::Texture player_texture_walking;
@@ -254,20 +282,16 @@ Enemy start_enemy(float x, float y)
     return enemy;
 }
 
-bool check_enemy_player_collision(Player &player, Enemy &enemy)
-{
-    if (sf::FloatRect(player.x, player.y, player.width, player.height).intersects(sf::FloatRect(enemy.x, enemy.y, 1, enemy.height)))
-    {
-        return true;
-    }
-    return false;
-}
-
-void level_load1(Player &player, sf::Texture &ground_texture, sf::Texture &enemy_texture)
+void level_load1(Player &player, sf::Texture &ground_texture, sf::Texture &enemy_texture, sf::Texture &star_texture)
 {
     int starting_pos[2] = {500, 500};
     player.x = starting_pos[0];
     player.y = starting_pos[1];
+
+    for (int i = 0; i < 16; i++)
+    {
+        add_ground(ground_texture, i * 64, 800 - 64);
+    }
 
     add_ground(ground_texture, 512, 800 - 64 - 64);
     add_ground(ground_texture, 512, 800 - 64 - 64 - 64);
@@ -277,15 +301,16 @@ void level_load1(Player &player, sf::Texture &ground_texture, sf::Texture &enemy
     add_ground(ground_texture, 512 + 64 + 64, 800 - 64 - 64);
     add_ground(ground_texture, 512 + 64 + 64, 800 - 64 - 64 - 64);
     add_ground(ground_texture, 512 + 64 + 64 + 64, 800 - 64 - 64);
-    add_ground(ground_texture, 320, 640);
-    add_ground(ground_texture, 320, 704);
 
     add_enemy(enemy_texture, 200, 200, 0, 0);
     add_enemy(enemy_texture, 100, 200, 5, 30);
+
+    add_star(star_texture, 640, 512);
+    add_star(star_texture, 832, 670);
     current_level = 1;
 }
 
-void level_load2(Player &player, sf::Texture &ground_texture, sf::Texture &enemy_texture)
+void level_load2(Player &player, sf::Texture &ground_texture, sf::Texture &enemy_texture, sf::Texture &star_texture)
 {
 
     int starting_pos[2] = {0, 0};
@@ -305,6 +330,8 @@ void level_load2(Player &player, sf::Texture &ground_texture, sf::Texture &enemy
 
     add_enemy(enemy_texture, 448, 170, 0, 0);
 
+    add_star(star_texture, 320, 192);
+    add_star(star_texture, 640, 192);
     current_level = 2;
 }
 
@@ -316,6 +343,7 @@ int main()
     window.setFramerateLimit(60);
 
     float time_to_live_player = 90;
+    int stars_found = 0;
 
     sf::CircleShape circle_player(4.f);
 
@@ -323,11 +351,11 @@ int main()
 
     sf::Texture enemy_texture;
     sf::Texture ground_texture;
+    sf::Texture star_texture;
 
     enemy_texture.loadFromFile("assets/aranha.png");
-
     ground_texture.loadFromFile("assets/mainlev_build.png");
-    create_ground(ground_texture);
+    star_texture.loadFromFile("assets/Star.png");
 
     sf::Font font;
     font.loadFromFile("assets/Arial.ttf");
@@ -344,7 +372,7 @@ int main()
 
     time_life.restart();
 
-    level_load1(player, ground_texture, enemy_texture);
+    level_load1(player, ground_texture, enemy_texture, star_texture);
     while (window.isOpen())
     {
         float dt = delta_clock.restart().asSeconds();
@@ -356,8 +384,8 @@ int main()
 
         player.moving = 0;
 
+        // mover tudo
         player_move(player, dt);
-
         for (int i = 0; i < enemy_count; i++)
         {
             enemy_move(enemy_array[i], dt);
@@ -370,6 +398,68 @@ int main()
             change_sprite_player(player);
             for (int i = 0; i < enemy_count; i++)
                 change_sprite_enemy(enemy_array[i]);
+
+            for (int i = 0; i < star_count; i++)
+                change_sprite_star(star_array[i]);
+        }
+
+        // check colistions
+        for (int i = 0; i < enemy_count; i++)
+        {
+            if (check_enemy_player_collision(player, enemy_array[i]) == true) // morreuuu
+            {
+                player.x = 0;
+                player.y = 0;
+            }
+        }
+
+        for (int i = 0; i < star_count; i++)
+        {
+            if (check_colistion_player_star(player, star_array[i])) // check star windawin
+            {
+                star_array[i].set_position(-100, -100);
+                stars_found++;
+                if (stars_found == star_count)
+                {
+                    if (current_level == 1)
+                    {
+                        enemy_count = 0;
+                        free(enemy_array);
+                        enemy_array = NULL;
+
+                        star_count = 0;
+                        free(star_array);
+                        star_array = NULL;
+
+                        ground_array_size = 0;
+                        free(ground_array);
+                        ground_array = NULL;
+
+                        stars_found = 0;
+                        level_load2(player, ground_texture, enemy_texture, star_texture);
+                        continue;
+                    }
+
+                    if (current_level == 2)
+                    {
+                        enemy_count = 0;
+                        free(enemy_array);
+                        enemy_array = NULL;
+
+                        star_count = 0;
+                        free(star_array);
+                        star_array = NULL;
+
+                        ground_array_size = 0;
+                        free(ground_array);
+                        ground_array = NULL;
+
+                        stars_found = 0;
+                        level_load1(player, ground_texture, enemy_texture, star_texture);
+                        continue;
+                    }
+                }
+            }
         }
 
         // move every sprite
@@ -395,13 +485,9 @@ int main()
             }
         }
 
-        for (int i = 0; i < enemy_count; i++)
+        for (int i = 0; i < star_count; i++)
         {
-            if (check_enemy_player_collision(player, enemy_array[i]) == true) // morreuuu
-            {
-                player.x = 0;
-                player.y = 0;
-            }
+            star_array[i].sprite.setPosition(star_array[i].x, star_array[i].y);
         }
 
         circle_player.setPosition(player.x, player.y); // para remover
@@ -428,6 +514,10 @@ int main()
         for (int i = 0; i < enemy_count; i++)
         {
             window.draw(enemy_array[i].sprite);
+        }
+        for (int i = 0; i < star_count; i++)
+        {
+            window.draw(star_array[i].sprite);
         }
         window.draw(circle_player);
         window.draw(player.sprite);

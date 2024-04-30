@@ -128,3 +128,42 @@ Enemy::~Enemy()
 {
     // Perform any necessary cleanup here
 }
+
+class Star
+{
+public:
+    float x, y;
+    sf::Sprite sprite;
+    int width = 64;
+    int height = 64;
+    int animation_frame = 0;
+    // Constructor
+    Star(int x, int y, sf::Texture *star_texturee);
+    void set_position(float x, float y);
+    // Destructor
+    ~Star();
+
+private:
+};
+
+// Constructor implementation
+Star::Star(int x, int y, sf::Texture *star_texturee)
+{
+    sprite.setTexture(*star_texturee);
+    sprite.setPosition(x, y);
+    sprite.setTextureRect(sf::IntRect(0, 0, 32, 32));
+    sprite.setScale(2, 2);
+}
+
+void Star::set_position(float xx, float yy)
+{
+    x = xx;
+    y = yy;
+    sprite.setPosition(x, y);
+}
+
+// Destructor implementation
+Star::~Star()
+{
+    // Perform any necessary cleanup here
+}
