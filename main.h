@@ -56,8 +56,8 @@ class Ground
 public:
     float x, y;
     sf::Sprite sprite;
-    int width = 64;
-    int height = 64;
+    int width = 48;
+    int height = 48;
     // Constructor
     Ground(int x, int y, sf::Texture *ground_texturee);
     void set_position(float x, float y);
@@ -73,7 +73,7 @@ Ground::Ground(int x, int y, sf::Texture *ground_texturee)
     sprite.setTexture(*ground_texturee);
     sprite.setPosition(x, y);
     sprite.setTextureRect(sf::IntRect(336, 367, 32, 32));
-    sprite.setScale(2, 2);
+    sprite.setScale(1.5, 1.5);
 }
 
 void Ground::set_position(float xx, float yy)
