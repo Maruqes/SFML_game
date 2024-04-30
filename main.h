@@ -14,6 +14,8 @@ public:
     int last_direction = 0;
     int width = 0;
     int height = 0;
+    int atacking = 0;
+    float time_to_atack_again = 0;
     sf::Texture player_texture_walking;
     sf::Texture player_texture_idle;
     // Constructor
@@ -99,6 +101,7 @@ public:
     int height = 0;
     float walk_left_right = 0;
     float offset = 0;
+    bool dead = false;
     // Constructor
     Enemy(sf::Texture *enemy_texture_walkinge, float x, float y);
 

@@ -59,6 +59,10 @@ bool check_enemy_player_collision(Player &player, Enemy &enemy)
 {
     if (sf::FloatRect(player.x, player.y, player.width, player.height).intersects(sf::FloatRect(enemy.x, enemy.y, 1, enemy.height)))
     {
+        if (enemy.dead == true)
+        {
+            return false;
+        }
         return true;
     }
     return false;
@@ -69,6 +73,41 @@ bool check_colistion_player_star(Player &player, Star &star)
     if (sf::FloatRect(player.x, player.y, player.width, player.height).intersects(star.sprite.getGlobalBounds()))
     {
         return true;
+    }
+    return false;
+}
+
+bool check_atack_enemies(Player &player, Enemy &enemy)
+{
+    if (enemy.dead == true)
+        return false;
+
+    if (player.left == 0)
+    {
+        if (sf::FloatRect(player.x, player.y, player.width, player.height).intersects(sf::FloatRect(enemy.x, enemy.y, enemy.width, enemy.height)))
+        {
+            enemy.dead = true;
+            return true;
+        }
+    }
+    else
+    {
+        if (enemy.left == 0)
+        {
+            if (sf::FloatRect(player.x + 30, player.y, player.width, player.height).intersects(sf::FloatRect(enemy.x, enemy.y, enemy.width, enemy.height)))
+            {
+                enemy.dead = true;
+                return true;
+            }
+        }
+        else
+        {
+            if (sf::FloatRect(player.x + 30, player.y, player.width, player.height).intersects(sf::FloatRect(enemy.x + enemy.width, enemy.y, enemy.width, enemy.height)))
+            {
+                enemy.dead = true;
+                return true;
+            }
+        }
     }
     return false;
 }
@@ -93,11 +132,41 @@ void jump(Player &player)
                                 break;
                             }
                         }
-                        
+
                         player.y -= 2.5;
                         std::this_thread::sleep_for(std::chrono::milliseconds(10));
-                    } 
+                    }
                     return; });
+    t1.detach();
+    return;
+}
+
+void atack(Player &player)
+{
+    if (player.atacking == 1)
+        return;
+    std::thread t1([&player]()
+                   {
+                    sf::Clock clock;
+                    clock.restart();
+                    int machado_off = 5 * 4;
+                    player.atacking = 1;
+                    printf("Atack\n");
+                    for (int i = 0; i < enemy_count; i++)
+                    {
+                        if (check_atack_enemies(player, enemy_array[i]) == true)
+                        {
+                            break;
+                        }
+                    }
+                    while(clock.getElapsedTime().asSeconds() < 5)
+                    {
+                        player.time_to_atack_again = clock.getElapsedTime().asSeconds();
+                        std::this_thread::sleep_for(std::chrono::milliseconds(10)); 
+                    }
+                    player.atacking = 0;
+                    return; });
+
     t1.detach();
     return;
 }
@@ -130,6 +199,14 @@ void player_move(Player &player, float dt)
             player.x += 100 * dt;
             player.moving = 2;
             player.last_direction = 2;
+        }
+    }
+
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::E))
+    {
+        if (player.atacking == 0)
+        {
+            atack(player);
         }
     }
 
@@ -502,8 +579,8 @@ int main()
         }
         text.setString("Time: " + timeString);
 
-        sf::Vector2i cursorPosition = sf::Mouse::getPosition(window);
-        printf("X: %d Y: %d\n", cursorPosition.x / 64 * 64, cursorPosition.y / 64 * 64);
+        // sf::Vector2i cursorPosition = sf::Mouse::getPosition(window);
+        // printf("X: %d Y: %d\n", cursorPosition.x / 64 * 64, cursorPosition.y / 64 * 64);
 
         // DRAW
         window.clear();
@@ -513,6 +590,8 @@ int main()
         }
         for (int i = 0; i < enemy_count; i++)
         {
+            if (enemy_array[i].dead == true)
+                continue;
             window.draw(enemy_array[i].sprite);
         }
         for (int i = 0; i < star_count; i++)
