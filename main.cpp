@@ -107,26 +107,28 @@ void jump(Player &player, float dt)
     // create a thread to make the player jump
     std::thread t1([&player, dt]()
                    {
-                    sf::Clock clock;
-                    clock.restart();
-                    int machado_off = 5 * 4;
-                    while(clock.getElapsedTime().asSeconds() < 0.35)
-                    {   if(player.left == 0){
-                            if(check_collision(player.x, player.y-2.5, player.width-machado_off, player.height) == true)
-                            {
-                                break;
-                            }
-                        }else{
-                            if(check_collision(player.x + machado_off, player.y-2.5, player.width-machado_off, player.height) == true)
-                            {
-                                break;
-                            }
-                        }
-
-                        player.y -= 180*dt;
-                        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            sf::Clock clock;
+            clock.restart();
+            int machado_off = 5 * 4;
+            while (clock.getElapsedTime().asSeconds() < 0.35)
+            {
+                if (player.left == 0) {
+                    if (check_collision(player.x, player.y - 220 * dt, player.width - machado_off, player.height) == true)
+                    {
+                        break;
                     }
-                    return; });
+                }
+                else {
+                    if (check_collision(player.x + machado_off, player.y - 220 * dt, player.width - machado_off, player.height) == true)
+                    {
+                        break;
+                    }
+                }
+
+                player.y -= 220 * dt;
+                std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            }
+            return; });
     t1.detach();
     return;
 }
@@ -137,25 +139,25 @@ void atack(Player &player)
         return;
     std::thread t1([&player]()
                    {
-                    sf::Clock clock;
-                    clock.restart();
-                    int machado_off = 5 * 4;
-                    player.atacking = 1;
-                    printf("Atack\n");
-                    for (int i = 0; i < enemy_count; i++)
-                    {
-                        if (check_atack_enemies(player, enemy_array[i]) == true)
-                        {
-                            break;
-                        }
-                    }
-                    while(clock.getElapsedTime().asSeconds() < 0.3)
-                    {
-                        player.time_to_atack_again = clock.getElapsedTime().asSeconds();
-                        std::this_thread::sleep_for(std::chrono::milliseconds(10)); 
-                    }
-                    player.atacking = 0;
-                    return; });
+            sf::Clock clock;
+            clock.restart();
+            int machado_off = 5 * 4;
+            player.atacking = 1;
+            printf("Atack\n");
+            for (int i = 0; i < enemy_count; i++)
+            {
+                if (check_atack_enemies(player, enemy_array[i]) == true)
+                {
+                    break;
+                }
+            }
+            while (clock.getElapsedTime().asSeconds() < 0.3)
+            {
+                player.time_to_atack_again = clock.getElapsedTime().asSeconds();
+                std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            }
+            player.atacking = 0;
+            return; });
 
     t1.detach();
     return;
@@ -171,7 +173,7 @@ void player_move(Player &player, float dt)
         {
             player.x -= machado_off;
         }
-        if (check_collision(player.x - (100 * dt * 2) + machado_off, player.y, player.width - machado_off, player.height - 5) == false)
+        if (check_collision(player.x - ((100 * dt * 2) * 2) + machado_off, player.y, player.width - machado_off, player.height - 5) == false)
         {
             player.x -= 100 * dt;
             player.moving = 1;
@@ -184,7 +186,7 @@ void player_move(Player &player, float dt)
         {
             player.x += machado_off;
         }
-        if (check_collision(player.x + (100 * dt * 2), player.y, player.width - machado_off, player.height - 5) == false)
+        if (check_collision(player.x + ((100 * dt * 2) * 2), player.y, player.width - machado_off, player.height - 5) == false)
         {
             player.x += 100 * dt;
             player.moving = 2;
@@ -212,7 +214,7 @@ void player_move(Player &player, float dt)
     // gravity
     if (player.left == 0)
     {
-        if (check_collision(player.x, player.y, player.width - machado_off, player.height) == false) // 5*4 = machado offset
+        if (check_collision(player.x, player.y + 170 * dt, player.width - machado_off, player.height) == false) // 5*4 = machado offset
         {
             player.y += 170 * dt;
             player.jumping = 1;
@@ -352,7 +354,7 @@ Enemy start_enemy(float x, float y)
 
 void level_load1(Player &player, sf::Texture &ground_texture, sf::Texture &enemy_texture, sf::Texture &star_texture)
 {
-    int starting_pos[2] = {500, 500};
+    int starting_pos[2] = {0, 0};
     player.x = starting_pos[0];
     player.y = starting_pos[1];
 
@@ -360,20 +362,102 @@ void level_load1(Player &player, sf::Texture &ground_texture, sf::Texture &enemy
     {
         add_ground(ground_texture, i * 48, 800 - 48);
     }
+    // primeiroandar
+    add_ground(ground_texture, 0, 96);
+    add_ground(ground_texture, 48, 96);
+    add_ground(ground_texture, 96, 96);
+    add_ground(ground_texture, 144, 96);
+    add_ground(ground_texture, 192, 96);
+    add_ground(ground_texture, 240, 96);
+    add_ground(ground_texture, 288, 96);
+    add_ground(ground_texture, 336, 96);
+    add_ground(ground_texture, 384, 96);
+    add_ground(ground_texture, 432, 96);
+    add_ground(ground_texture, 480, 96);
+    add_ground(ground_texture, 528, 96);
+    add_ground(ground_texture, 576, 96);
+    add_ground(ground_texture, 624, 96);
+    add_ground(ground_texture, 672, 96);
+    add_ground(ground_texture, 720, 96);
+    add_ground(ground_texture, 768, 96);
+    add_ground(ground_texture, 816, 96);
+    add_ground(ground_texture, 864, 96);
+    //
+    // segundo andar
 
-    add_ground(ground_texture, 512, 800 - 64 - 64);
-    add_ground(ground_texture, 512, 800 - 64 - 64 - 64);
+    add_ground(ground_texture, 144, 240);
+    add_ground(ground_texture, 192, 240);
+    add_ground(ground_texture, 240, 240);
+    add_ground(ground_texture, 288, 240);
+    add_ground(ground_texture, 336, 240);
+    add_ground(ground_texture, 384, 240);
+    add_ground(ground_texture, 432, 240);
+    add_ground(ground_texture, 480, 240);
+    add_ground(ground_texture, 528, 240);
+    add_ground(ground_texture, 576, 240);
+    add_ground(ground_texture, 624, 240);
+    add_ground(ground_texture, 672, 240);
+    add_ground(ground_texture, 720, 240);
+    add_ground(ground_texture, 768, 240);
+    add_ground(ground_texture, 816, 240);
+    add_ground(ground_texture, 864, 240);
+    add_ground(ground_texture, 960, 240);
+    add_ground(ground_texture, 912, 240);
+    add_ground(ground_texture, 1008, 240);
+    //
+    add_ground(ground_texture, 0, 384);
+    add_ground(ground_texture, 48, 384);
+    add_ground(ground_texture, 192, 528);
+    add_ground(ground_texture, 144, 528);
+    add_ground(ground_texture, 0, 672);
+    add_ground(ground_texture, 48, 672);
+
+    // coluna
+    add_ground(ground_texture, 240, 288);
+    add_ground(ground_texture, 240, 384);
+    add_ground(ground_texture, 240, 528);
+    add_ground(ground_texture, 240, 528);
+
+    add_ground(ground_texture, 240, 288);
+    add_ground(ground_texture, 240, 336);
+    add_ground(ground_texture, 240, 384);
+    add_ground(ground_texture, 240, 432);
+    add_ground(ground_texture, 240, 480);
+    add_ground(ground_texture, 240, 528);
+    //
+
+    add_ground(ground_texture, 288, 528);
+    add_ground(ground_texture, 336, 528);
+    add_ground(ground_texture, 384, 528);
+    add_ground(ground_texture, 432, 528);
+    add_ground(ground_texture, 480, 528);
+    add_ground(ground_texture, 528, 528);
+    add_ground(ground_texture, 576, 528);
+    add_ground(ground_texture, 624, 528);
+    add_ground(ground_texture, 672, 528);
+    add_ground(ground_texture, 720, 528);
+    add_ground(ground_texture, 768, 528);
+    //
+    add_ground(ground_texture, 1008, 624);
+    add_ground(ground_texture, 960, 624);
+    add_ground(ground_texture, 912, 624);
+
+    add_ground(ground_texture, 768, 384);
+    add_ground(ground_texture, 768, 438);
+    add_ground(ground_texture, 768, 480);
+
+    add_ground(ground_texture, 720, 384);
+    add_ground(ground_texture, 672, 384);
+    add_ground(ground_texture, 576, 384);
+    add_ground(ground_texture, 528, 384);
+    add_ground(ground_texture, 480, 384);
+    add_ground(ground_texture, 432, 384);
+    add_ground(ground_texture, 384, 384);
+    add_ground(ground_texture, 624, 384);
+
     // add more to make the map
-    add_ground(ground_texture, 512 + 64, 800 - 64 - 64);
-    add_ground(ground_texture, 512 + 64, 800 - 64 - 64 - 64);
-    add_ground(ground_texture, 512 + 64 + 64, 800 - 64 - 64);
-    add_ground(ground_texture, 512 + 64 + 64, 800 - 64 - 64 - 64);
-    add_ground(ground_texture, 512 + 64 + 64 + 64, 800 - 64 - 64);
 
     // teto
-    add_ground(ground_texture, 512 + 64, 448);
-    add_ground(ground_texture, 512 + 64 + 64, 448);
-    add_ground(ground_texture, 512 + 64 + 64 + 64, 448);
 
     add_enemy(enemy_texture, 200, 200, 0, 0);
     add_enemy(enemy_texture, 100, 200, 5, 30);
@@ -575,8 +659,8 @@ int main()
         }
         text.setString("Time: " + timeString);
 
-        // sf::Vector2i cursorPosition = sf::Mouse::getPosition(window);
-        // printf("X: %d Y: %d\n", cursorPosition.x / 48 * 48, cursorPosition.y / 48 * 48);
+        sf::Vector2i cursorPosition = sf::Mouse::getPosition(window);
+        printf("X: %d Y: %d\n", cursorPosition.x / 48 * 48, cursorPosition.y / 48 * 48);
 
         // DRAW
         window.clear();
