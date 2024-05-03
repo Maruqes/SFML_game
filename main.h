@@ -18,8 +18,9 @@ public:
     float time_to_atack_again = 0;
     sf::Texture player_texture_walking;
     sf::Texture player_texture_idle;
+    sf::Texture player_texture_atack;
     // Constructor
-    Player(sf::Texture *player_texture_idlee, sf::Texture *player_texture_walkinge, int sX, int sY);
+    Player(sf::Texture *player_texture_idlee, sf::Texture *player_texture_walkinge, sf::Texture *player_texture_atacke, int sX, int sY);
 
     // Destructor
     ~Player();
@@ -29,11 +30,11 @@ private:
 };
 
 // Constructor implementation
-Player::Player(sf::Texture *player_texture_idlee, sf::Texture *player_texture_walkinge, int sX, int sY)
+Player::Player(sf::Texture *player_texture_idlee, sf::Texture *player_texture_walkinge, sf::Texture *player_texture_atacke, int sX, int sY)
 {
     player_texture_idle = *player_texture_idlee;
     player_texture_walking = *player_texture_walkinge;
-
+    player_texture_atack = *player_texture_atacke;
     x = sX;
     y = sY;
     animation_frame = 0;

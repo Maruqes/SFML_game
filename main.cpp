@@ -1,4 +1,5 @@
 #include <SFML/Graphics.hpp>
+#include <SFML/Window.hpp>
 #include "main.h"
 #include <string.h>
 #include <thread>
@@ -109,40 +110,86 @@ void jump(Player &player, float dt)
                    {
             sf::Clock clock;
             clock.restart();
-            int machado_off = 5 * 4;
             while (clock.getElapsedTime().asSeconds() < 0.35)
             {
-                if (player.left == 0) {
-                    if (check_collision(player.x, player.y - 220 * dt, player.width - machado_off, player.height) == true)
+                    if (check_collision(player.x, player.y - 500 * dt, player.width , player.height) == true)
                     {
+                        printf("Colidiu\n");
                         break;
                     }
-                }
-                else {
-                    if (check_collision(player.x + machado_off, player.y - 220 * dt, player.width - machado_off, player.height) == true)
-                    {
-                        break;
-                    }
-                }
 
-                player.y -= 220 * dt;
-                std::this_thread::sleep_for(std::chrono::milliseconds(10));
+                player.y -= 500 * dt;
+                std::this_thread::sleep_for(std::chrono::milliseconds(20));
             }
             return; });
     t1.detach();
     return;
 }
 
+void change_sprite_player(Player &player)
+{
+    if (player.atacking == 1)
+    {
+        player.sprite.setTexture(player.player_texture_atack);
+        player.animation_frame++;
+        if (player.animation_frame >= 18)
+            player.animation_frame = 0;
+        player.sprite.setTextureRect(sf::IntRect(43 * (player.animation_frame), 0, 43, 37));
+        return;
+    }
+    if (player.moving == 0)
+    {
+        player.sprite.setTexture(player.player_texture_idle);
+
+        player.animation_frame++;
+        if (player.animation_frame >= 10)
+            player.animation_frame = 0;
+        player.sprite.setTextureRect(sf::IntRect(24 * (player.animation_frame), 0, 24, 32));
+    }
+    else
+    {
+        player.sprite.setTexture(player.player_texture_walking);
+        player.animation_frame++;
+        if (player.animation_frame >= 11)
+            player.animation_frame = 0;
+
+        if (player.moving == 1)
+        {
+            if (check_collision(player.x, player.y, -24 * 3, player.height - 4) == false)
+            {
+                player.sprite.setScale(-3, 3);
+                player.left = 1;
+                player.width = -24 * 3;
+            }
+        }
+        else
+        {
+            if (check_collision(player.x, player.y, 24 * 3, player.height - 4) == false)
+            {
+                player.sprite.setScale(3, 3);
+                player.left = 0;
+                player.width = 24 * 3;
+            }
+        }
+
+        player.sprite.setTextureRect(sf::IntRect(22 * (player.animation_frame), 0, 22, 32));
+    }
+}
+
 void atack(Player &player)
 {
     if (player.atacking == 1)
         return;
+
     std::thread t1([&player]()
                    {
             sf::Clock clock;
+            sf::Clock animation_clock;
+            bool animatee=true;
             clock.restart();
-            int machado_off = 5 * 4;
             player.atacking = 1;
+
+
             printf("Atack\n");
             for (int i = 0; i < enemy_count; i++)
             {
@@ -151,6 +198,17 @@ void atack(Player &player)
                     break;
                 }
             }
+            player.animation_frame = 0;
+            while(animatee)
+            {
+                change_sprite_player(player);
+                if (animation_clock.getElapsedTime().asSeconds() > 0.7)
+                {
+                    animatee = false;
+                }
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            }
+
             while (clock.getElapsedTime().asSeconds() < 0.3)
             {
                 player.time_to_atack_again = clock.getElapsedTime().asSeconds();
@@ -165,56 +223,50 @@ void atack(Player &player)
 
 void player_move(Player &player, float dt)
 {
-    int machado_off = 5 * 4;
 
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q))
+    if (!player.atacking)
     {
-        if (player.last_direction == 2)
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q))
         {
-            player.x -= machado_off;
+            if (check_collision(player.x - ((100 * dt * 2) * 5), player.y, player.width, player.height - 5) == false)
+            {
+                player.x -= 100 * dt;
+                player.moving = 1;
+                player.last_direction = 1;
+            }
         }
-        if (check_collision(player.x - ((100 * dt * 2) * 2) + machado_off, player.y, player.width - machado_off, player.height - 5) == false)
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
         {
-            player.x -= 100 * dt;
-            player.moving = 1;
-            player.last_direction = 1;
+            if (check_collision(player.x + ((100 * dt * 2) * 2), player.y, player.width, player.height - 5) == false)
+            {
+                player.x += 100 * dt;
+                player.moving = 2;
+                player.last_direction = 2;
+            }
         }
-    }
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
-    {
-        if (player.last_direction == 1)
-        {
-            player.x += machado_off;
-        }
-        if (check_collision(player.x + ((100 * dt * 2) * 2), player.y, player.width - machado_off, player.height - 5) == false)
-        {
-            player.x += 100 * dt;
-            player.moving = 2;
-            player.last_direction = 2;
-        }
-    }
 
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::E))
-    {
-        if (player.atacking == 0)
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::E))
         {
-            atack(player);
+            if (player.atacking == 0)
+            {
+                atack(player);
+            }
         }
-    }
 
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
-    {
-        if (player.jumping == 0)
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
         {
-            player.jumping = 1;
-            jump(player, dt);
+            if (player.jumping == 0)
+            {
+                player.jumping = 1;
+                jump(player, dt);
+            }
         }
     }
 
     // gravity
     if (player.left == 0)
     {
-        if (check_collision(player.x, player.y + 170 * dt, player.width - machado_off, player.height) == false) // 5*4 = machado offset
+        if (check_collision(player.x, player.y + (170 * dt), player.width, player.height - 5) == false) // 5*4 = machado offset
         {
             player.y += 170 * dt;
             player.jumping = 1;
@@ -226,7 +278,7 @@ void player_move(Player &player, float dt)
     }
     else
     {
-        if (check_collision(player.x + machado_off, player.y, player.width - machado_off, player.height) == false) // 5*4 = machado offset
+        if (check_collision(player.x, player.y + (170 * dt), player.width, player.height - 5) == false) // 5*4 = machado offset
         {
             player.y += 170 * dt;
             player.jumping = 1;
@@ -235,6 +287,12 @@ void player_move(Player &player, float dt)
         {
             player.jumping = 0;
         }
+    }
+
+    if (player.y > 800)
+    {
+        player.x = 0;
+        player.y = 0;
     }
 }
 
@@ -268,38 +326,6 @@ void enemy_move(Enemy &enemy, float dt)
                 enemy.offset = 0;
             }
         }
-    }
-}
-void change_sprite_player(Player &player)
-{
-    if (player.moving == 0)
-    {
-        player.sprite.setTexture(player.player_texture_idle);
-
-        player.animation_frame++;
-        if (player.animation_frame >= 10)
-            player.animation_frame = 0;
-        player.sprite.setTextureRect(sf::IntRect(24 * (player.animation_frame), 0, 24, 32));
-    }
-    else
-    {
-        player.sprite.setTexture(player.player_texture_walking);
-        player.animation_frame++;
-        if (player.animation_frame >= 11)
-            player.animation_frame = 0;
-
-        if (player.moving == 1)
-        {
-            player.sprite.setScale(-3, 3);
-            player.left = 1;
-        }
-        else
-        {
-            player.sprite.setScale(3, 3);
-            player.left = 0;
-        }
-
-        player.sprite.setTextureRect(sf::IntRect(22 * (player.animation_frame), 0, 22, 32));
     }
 }
 
@@ -337,8 +363,10 @@ Player start_player()
     player_texture_walking.loadFromFile("assets/Skeleton Walk.png");
     sf::Texture player_texture_idle;
     player_texture_idle.loadFromFile("assets/Skeleton Idle.png");
+    sf::Texture player_texture_atackk;
+    player_texture_atackk.loadFromFile("assets/Skeleton Attack.png");
 
-    Player player(&player_texture_idle, &player_texture_walking, 0, 0);
+    Player player(&player_texture_idle, &player_texture_walking, &player_texture_atackk, 0, 0);
     return player;
 }
 
@@ -623,11 +651,25 @@ int main()
         //  make the sprite follow the player face left or not
         if (player.left == 0)
         {
-            player.sprite.setPosition(player.x, player.y);
+            if (player.atacking == 1)
+            {
+                player.sprite.setPosition(player.x - 20, player.y - 10);
+            }
+            else
+            {
+                player.sprite.setPosition(player.x, player.y);
+            }
         }
         else
         {
-            player.sprite.setPosition(player.x + player.width, player.y);
+            if (player.atacking == 1)
+            {
+                player.sprite.setPosition(player.x + 20, player.y - 10);
+            }
+            else
+            {
+                player.sprite.setPosition(player.x, player.y);
+            }
         }
 
         for (int i = 0; i < enemy_count; i++)
@@ -658,9 +700,13 @@ int main()
             timeString = timeString.substr(0, dotPos + 3);
         }
         text.setString("Time: " + timeString);
+        if (time_to_live_player - time_life.getElapsedTime().asSeconds() < 0)
+        {
+            return 0;
+        }
 
         sf::Vector2i cursorPosition = sf::Mouse::getPosition(window);
-        printf("X: %d Y: %d\n", cursorPosition.x / 48 * 48, cursorPosition.y / 48 * 48);
+        // printf("X: %d Y: %d\n", cursorPosition.x / 48 * 48, cursorPosition.y / 48 * 48);
 
         // DRAW
         window.clear();
