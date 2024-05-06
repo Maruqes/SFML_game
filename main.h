@@ -16,6 +16,8 @@ public:
     int height = 0;
     int atacking = 0;
     float time_to_atack_again = 0;
+    int start_pos_x = 0;
+    int start_pos_y = 0;
     sf::Texture player_texture_walking;
     sf::Texture player_texture_idle;
     sf::Texture player_texture_atack;

@@ -14,6 +14,9 @@ int ground_array_size = 0;
 int enemy_count = 0;
 int star_count = 0;
 int current_level = 1;
+sf::Texture background;
+sf::Sprite background_sprite;
+
 // realocate the ground array and add new ground
 
 void add_ground(sf::Texture &ground_texture, int x, int y)
@@ -266,7 +269,7 @@ void player_move(Player &player, float dt)
     // gravity
     if (player.left == 0)
     {
-        if (check_collision(player.x, player.y + (170 * dt), player.width, player.height - 5) == false) // 5*4 = machado offset
+        if (check_collision(player.x, player.y + (170 * dt), player.width, player.height - 2) == false) // 5*4 = machado offset
         {
             player.y += 170 * dt;
             player.jumping = 1;
@@ -291,8 +294,8 @@ void player_move(Player &player, float dt)
 
     if (player.y > 800)
     {
-        player.x = 0;
-        player.y = 0;
+        player.x = player.start_pos_x;
+        player.y = player.start_pos_y;
     }
 }
 
@@ -385,122 +388,207 @@ void level_load1(Player &player, sf::Texture &ground_texture, sf::Texture &enemy
     int starting_pos[2] = {0, 0};
     player.x = starting_pos[0];
     player.y = starting_pos[1];
+    player.start_pos_x = starting_pos[0];
+    player.start_pos_y = starting_pos[1];
+    background.loadFromFile("assets/background4a.png");
+    background_sprite.setTexture(background);
 
     for (int i = 0; i < 22; i++)
     {
         add_ground(ground_texture, i * 48, 800 - 48);
     }
-    // primeiroandar
-    add_ground(ground_texture, 0, 96);
-    add_ground(ground_texture, 48, 96);
-    add_ground(ground_texture, 96, 96);
-    add_ground(ground_texture, 144, 96);
-    add_ground(ground_texture, 192, 96);
-    add_ground(ground_texture, 240, 96);
-    add_ground(ground_texture, 288, 96);
-    add_ground(ground_texture, 336, 96);
-    add_ground(ground_texture, 384, 96);
-    add_ground(ground_texture, 432, 96);
-    add_ground(ground_texture, 480, 96);
-    add_ground(ground_texture, 528, 96);
-    add_ground(ground_texture, 576, 96);
-    add_ground(ground_texture, 624, 96);
-    add_ground(ground_texture, 672, 96);
-    add_ground(ground_texture, 720, 96);
-    add_ground(ground_texture, 768, 96);
-    add_ground(ground_texture, 816, 96);
-    add_ground(ground_texture, 864, 96);
-    //
-    // segundo andar
 
-    add_ground(ground_texture, 144, 240);
-    add_ground(ground_texture, 192, 240);
-    add_ground(ground_texture, 240, 240);
-    add_ground(ground_texture, 288, 240);
-    add_ground(ground_texture, 336, 240);
-    add_ground(ground_texture, 384, 240);
-    add_ground(ground_texture, 432, 240);
-    add_ground(ground_texture, 480, 240);
-    add_ground(ground_texture, 528, 240);
-    add_ground(ground_texture, 576, 240);
-    add_ground(ground_texture, 624, 240);
-    add_ground(ground_texture, 672, 240);
-    add_ground(ground_texture, 720, 240);
-    add_ground(ground_texture, 768, 240);
-    add_ground(ground_texture, 816, 240);
-    add_ground(ground_texture, 864, 240);
-    add_ground(ground_texture, 960, 240);
-    add_ground(ground_texture, 912, 240);
-    add_ground(ground_texture, 1008, 240);
+    for (int i = 0; i < 36; i++)
+    {
+        add_ground(ground_texture, i * 24, 96);
+    }
+
+    //
+    for (int i = 8; i < 43; i++)
+    {
+        add_ground(ground_texture, i * 24, 240);
+    }
+
     //
     add_ground(ground_texture, 0, 384);
     add_ground(ground_texture, 48, 384);
-    add_ground(ground_texture, 192, 528);
+    add_ground(ground_texture, 96, 384);
     add_ground(ground_texture, 144, 528);
-    add_ground(ground_texture, 0, 672);
-    add_ground(ground_texture, 48, 672);
+    add_ground(ground_texture, 192, 528);
+    add_ground(ground_texture, 240, 528);
+    add_ground(ground_texture, 0, 678);
+    add_ground(ground_texture, 48, 678);
+    add_ground(ground_texture, 96, 678);
 
-    // coluna
-    add_ground(ground_texture, 240, 288);
-    add_ground(ground_texture, 240, 384);
-    add_ground(ground_texture, 240, 528);
-    add_ground(ground_texture, 240, 528);
-
-    add_ground(ground_texture, 240, 288);
-    add_ground(ground_texture, 240, 336);
-    add_ground(ground_texture, 240, 384);
-    add_ground(ground_texture, 240, 432);
-    add_ground(ground_texture, 240, 480);
-    add_ground(ground_texture, 240, 528);
     //
+    for (int i = 10; i < 22; i++)
+    {
+        add_ground(ground_texture, 288, i * 24);
+    }
 
-    add_ground(ground_texture, 288, 528);
-    add_ground(ground_texture, 336, 528);
-    add_ground(ground_texture, 384, 528);
-    add_ground(ground_texture, 432, 528);
-    add_ground(ground_texture, 480, 528);
-    add_ground(ground_texture, 528, 528);
-    add_ground(ground_texture, 576, 528);
-    add_ground(ground_texture, 624, 528);
-    add_ground(ground_texture, 672, 528);
-    add_ground(ground_texture, 720, 528);
-    add_ground(ground_texture, 768, 528);
+    add_ground(ground_texture, 0, 696);
+    add_ground(ground_texture, 0, 720);
+    add_ground(ground_texture, 0, 744);
+    add_ground(ground_texture, 24, 696);
+    add_ground(ground_texture, 24, 720);
+    add_ground(ground_texture, 24, 744);
+    add_ground(ground_texture, 48, 696);
+    add_ground(ground_texture, 48, 720);
+    add_ground(ground_texture, 48, 744);
+    add_ground(ground_texture, 24, 768);
+    add_ground(ground_texture, 48, 768);
+    add_ground(ground_texture, 0, 768);
+    add_ground(ground_texture, 0, 744);
+    add_ground(ground_texture, 0, 744);
+
     //
-    add_ground(ground_texture, 1008, 624);
-    add_ground(ground_texture, 960, 624);
-    add_ground(ground_texture, 912, 624);
+    add_ground(ground_texture, 96, 696);
+    add_ground(ground_texture, 96, 720);
+    add_ground(ground_texture, 96, 744);
+    add_ground(ground_texture, 96, 768);
 
-    add_ground(ground_texture, 768, 384);
-    add_ground(ground_texture, 768, 438);
-    add_ground(ground_texture, 768, 480);
+    ///
+    for (int i = 0; i < 43; i++)
+    {
+        add_ground(ground_texture, i * 24, 744);
+    }
+    //
+    for (int i = 0; i < 43; i++)
+    {
+        add_ground(ground_texture, i * 24, 768);
+    }
+    //
+    for (int i = 6; i < 38; i++)
+    {
+        add_ground(ground_texture, i * 24, 528);
+    }
 
-    add_ground(ground_texture, 720, 384);
-    add_ground(ground_texture, 672, 384);
-    add_ground(ground_texture, 576, 384);
-    add_ground(ground_texture, 528, 384);
-    add_ground(ground_texture, 480, 384);
-    add_ground(ground_texture, 432, 384);
-    add_ground(ground_texture, 384, 384);
-    add_ground(ground_texture, 624, 384);
+    for (int i = 22; i < 32; i++)
+    {
+        add_ground(ground_texture, i * 24, 384);
+    }
 
-    // add more to make the map
+    for (int i = 0; i < 43; i++)
+    {
+        add_ground(ground_texture, i * 24, 768);
+    }
 
-    // teto
+    for (int i = 16; i < 22; i++)
+    {
+        add_ground(ground_texture, 744, i * 24);
+    }
+    add_ground(ground_texture, 912, 768);
+    add_ground(ground_texture, 936, 768);
+    add_ground(ground_texture, 960, 768);
+    add_ground(ground_texture, 984, 768);
+    add_ground(ground_texture, 1008, 768);
+    add_ground(ground_texture, 912, 744);
+    add_ground(ground_texture, 936, 744);
+    add_ground(ground_texture, 960, 744);
+    add_ground(ground_texture, 984, 744);
+    add_ground(ground_texture, 1008, 744);
+    add_ground(ground_texture, 984, 696);
+    add_ground(ground_texture, 1008, 696);
+    add_ground(ground_texture, 960, 696);
+    add_ground(ground_texture, 936, 696);
+    add_ground(ground_texture, 912, 696);
+    add_ground(ground_texture, 984, 720);
+    add_ground(ground_texture, 1008, 720);
+    add_ground(ground_texture, 960, 720);
+    add_ground(ground_texture, 936, 720);
+    add_ground(ground_texture, 912, 720);
+    add_ground(ground_texture, 984, 672);
+    add_ground(ground_texture, 1008, 672);
+    add_ground(ground_texture, 960, 672);
+    add_ground(ground_texture, 936, 672);
+    add_ground(ground_texture, 912, 672);
+    add_ground(ground_texture, 888, 528);
+    add_ground(ground_texture, 864, 528);
+    add_ground(ground_texture, 816, 528);
 
-    add_enemy(enemy_texture, 200, 200, 0, 0);
-    add_enemy(enemy_texture, 100, 200, 5, 30);
+    add_enemy(enemy_texture, 672, 24, 0, 0);
 
-    add_star(star_texture, 640, 512);
-    add_star(star_texture, 832, 670);
+    add_enemy(enemy_texture, 480, 864, 0, 0);
+
+    add_star(star_texture, 384, 30);
+    //  add_star(star_texture, 672, 186);
+    //  add_star(star_texture, 48, 620);
+    //  add_star(star_texture, 864, 456);
+    // add_star(star_texture, 720, 402);
+    //  add_star(star_texture, 720, 432);
+    //    add_star(star_texture, 672, 432);
+    //  add_star(star_texture, 672, 402);
+
     current_level = 1;
 }
 
 void level_load2(Player &player, sf::Texture &ground_texture, sf::Texture &enemy_texture, sf::Texture &star_texture)
 {
 
+    int starting_pos[2] = {960, 624};
+    player.x = starting_pos[0];
+    player.y = starting_pos[1];
+    player.start_pos_x = starting_pos[0];
+    player.start_pos_y = starting_pos[1];
+
+    background.loadFromFile("assets/background3.png");
+    background_sprite.setTexture(background);
+
+    for (int i = 34; i < 43; i++)
+    {
+        add_ground(ground_texture, i * 24, 792);
+    }
+    for (int i = 34; i < 43; i++)
+    {
+        add_ground(ground_texture, i * 24, 768);
+    }
+
+    for (int i = 15; i < 28; i++)
+    {
+        add_ground(ground_texture, i * 24, 672);
+    }
+
+    for (int i = 0; i < 9; i++)
+    {
+        add_ground(ground_texture, i * 24, 576);
+    }
+
+    for (int i = 15; i < 28; i++)
+    {
+        add_ground(ground_texture, i * 24, 480);
+    }
+    for (int i = 33; i < 43; i++)
+    {
+        add_ground(ground_texture, i * 24, 360);
+    }
+    for (int i = 14; i < 27; i++)
+    {
+        add_ground(ground_texture, i * 24, 168);
+    }
+    for (int i = 0; i < 5; i++)
+    {
+        add_ground(ground_texture, i * 24, 216);
+    }
+
+    add_enemy(enemy_texture, 340, 120, 0, 0);
+    add_enemy(enemy_texture, 340, 432, 0, 0);
+    add_enemy(enemy_texture, 870, 312, 0, 0);
+    add_star(star_texture, 320, 192);
+    add_star(star_texture, 1000, 192);
+    current_level = 2;
+}
+
+void level_load3(Player &player, sf::Texture &ground_texture, sf::Texture &enemy_texture, sf::Texture &star_texture)
+{
+
     int starting_pos[2] = {0, 0};
     player.x = starting_pos[0];
     player.y = starting_pos[1];
+    player.start_pos_x = starting_pos[0];
+    player.start_pos_y = starting_pos[1];
+
+    background.loadFromFile("assets/background4b.png");
+    background_sprite.setTexture(background);
 
     add_ground(ground_texture, 0, 192);
     add_ground(ground_texture, 64, 192);
@@ -517,7 +605,7 @@ void level_load2(Player &player, sf::Texture &ground_texture, sf::Texture &enemy
 
     add_star(star_texture, 320, 192);
     add_star(star_texture, 640, 192);
-    current_level = 2;
+    current_level = 3;
 }
 
 int main()
@@ -527,7 +615,7 @@ int main()
         "Nome do Jogo");
     window.setFramerateLimit(60);
 
-    float time_to_live_player = 90;
+    float time_to_live_player = 50000;
     int stars_found = 0;
 
     sf::CircleShape circle_player(4.f);
@@ -593,8 +681,8 @@ int main()
         {
             if (check_enemy_player_collision(player, enemy_array[i]) == true) // morreuuu
             {
-                player.x = 0;
-                player.y = 0;
+                player.x = player.start_pos_x;
+                player.y = player.start_pos_y;
             }
         }
 
@@ -626,6 +714,24 @@ int main()
                     }
 
                     if (current_level == 2)
+                    {
+                        enemy_count = 0;
+                        free(enemy_array);
+                        enemy_array = NULL;
+
+                        star_count = 0;
+                        free(star_array);
+                        star_array = NULL;
+
+                        ground_array_size = 0;
+                        free(ground_array);
+                        ground_array = NULL;
+
+                        stars_found = 0;
+                        level_load3(player, ground_texture, enemy_texture, star_texture);
+                        continue;
+                    }
+                    else if (current_level == 3)
                     {
                         enemy_count = 0;
                         free(enemy_array);
@@ -705,11 +811,16 @@ int main()
             return 0;
         }
 
+        // ver posiçao blocos
+
         sf::Vector2i cursorPosition = sf::Mouse::getPosition(window);
-        // printf("X: %d Y: %d\n", cursorPosition.x / 48 * 48, cursorPosition.y / 48 * 48);
+        printf("X: %d Y: %d\n", cursorPosition.x / 24 * 24, cursorPosition.y / 24 * 24);
 
         // DRAW
         window.clear();
+        // set the background to 1024 800
+        background_sprite.setScale(1024 / background_sprite.getLocalBounds().width, 800 / background_sprite.getLocalBounds().height);
+        window.draw(background_sprite);
         for (int i = 0; i < ground_array_size; i++)
         {
             window.draw(ground_array[i].sprite);
