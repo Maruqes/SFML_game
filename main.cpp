@@ -693,6 +693,121 @@ void level_load3(Player &player, sf::Texture &ground_texture, sf::Texture &enemy
     current_level = 3;
 }
 
+int menu_pausa(sf::RenderWindow &window, Player &player)
+{
+    sf::Font font;
+    font.loadFromFile("assets/Arial.ttf");
+    sf::Text text;
+    text.setFont(font);
+    text.setCharacterSize(40);
+    text.setFillColor(sf::Color::Red);
+    text.setPosition(0, 0);
+
+    sf::Text text2;
+    text2.setFont(font);
+    text2.setCharacterSize(40);
+    text2.setFillColor(sf::Color::Red);
+    text2.setPosition(0, 0);
+
+    sf::Text text3;
+    text3.setFont(font);
+    text3.setCharacterSize(40);
+    text3.setFillColor(sf::Color::Red);
+    text3.setPosition(0, 0);
+
+    sf::Text text4;
+    text4.setFont(font);
+    text4.setCharacterSize(40);
+    text4.setFillColor(sf::Color::Red);
+    text4.setPosition(0, 0);
+
+    sf::Text text_arr[3] = {text2, text3, text4};
+
+    sf::Clock clock;
+    clock.restart();
+    sf::Clock delta_clock;
+    sf::Clock time_life;
+
+    time_life.restart();
+
+    int selected_option = 0;
+
+    while (window.isOpen())
+    {
+        float dt = delta_clock.restart().asSeconds();
+
+        sf::Event event;
+        while (window.pollEvent(event))
+            if (event.type == sf::Event::Closed)
+                window.close();
+
+        text.setString("Menu Pausa");
+        text.setPosition(window.getSize().x / 2 - text.getLocalBounds().width / 2, window.getSize().y / 2 - text.getLocalBounds().height / 2 - 200);
+
+        text_arr[0].setString("Continuar");
+        text_arr[0].setPosition(window.getSize().x / 2 - text_arr[0].getLocalBounds().width / 2, window.getSize().y / 2 - text_arr[0].getLocalBounds().height / 2 - 50);
+
+        text_arr[1].setString("Reiniciar");
+        text_arr[1].setPosition(window.getSize().x / 2 - text_arr[1].getLocalBounds().width / 2, window.getSize().y / 2 - text_arr[1].getLocalBounds().height / 2);
+
+        text_arr[2].setString("Sair");
+        text_arr[2].setPosition(window.getSize().x / 2 - text_arr[2].getLocalBounds().width / 2, window.getSize().y / 2 - text_arr[2].getLocalBounds().height / 2 + 50);
+
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
+        {
+            if (player.pressed_menu_down == 0)
+            {
+                selected_option++;
+                if (selected_option > 2)
+                {
+                    selected_option = 0;
+                }
+                player.pressed_menu_down = 1;
+            }
+        }
+        else
+        {
+            player.pressed_menu_down = 0;
+        }
+
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
+        {
+            if (player.pressed_menu_up == 0)
+            {
+                selected_option--;
+                if (selected_option < 0)
+                {
+                    selected_option = 2;
+                }
+                player.pressed_menu_up = 1;
+            }
+        }
+        else
+        {
+            player.pressed_menu_up = 0;
+        }
+
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Return))
+        {
+            return selected_option;
+        }
+
+        for (int i = 0; i < 3; i++)
+        {
+            text_arr[i].setFillColor(sf::Color::Red);
+        }
+        text_arr[selected_option].setFillColor(sf::Color::Green);
+
+        window.clear();
+        window.draw(text);
+        window.draw(text_arr[0]);
+        window.draw(text_arr[1]);
+        window.draw(text_arr[2]);
+        window.display();
+    }
+    return 0;
+}
+
 int main()
 {
     sf::RenderWindow window(
@@ -910,6 +1025,27 @@ int main()
         if (time_to_live_player - time_life.getElapsedTime().asSeconds() < 0)
         {
             return 0;
+        }
+
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))
+        {
+            int menu = menu_pausa(window, player); // 0 continue 1reset 2quit
+            if (menu == 0)
+            {
+                continue;
+            }
+            if (menu == 1)
+            {
+                player.x = player.start_pos_x;
+                player.y = player.start_pos_y;
+                player.vidas = 3;
+                time_life.restart();
+                continue;
+            }
+            else if (menu == 2)
+            {
+                return 0;
+            }
         }
 
         // DRAW

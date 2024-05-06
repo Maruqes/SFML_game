@@ -23,6 +23,9 @@ public:
     sf::Texture player_texture_atack;
     int vidas = 3;
     int reset_check = 0;
+    int escape_reset = 0;
+    int pressed_menu_down = 0;
+    int pressed_menu_up = 0;
     // Constructor
     Player(sf::Texture *player_texture_idlee, sf::Texture *player_texture_walkinge, sf::Texture *player_texture_atacke, int sX, int sY);
 
