@@ -269,6 +269,21 @@ void player_move(Player &player, float dt)
                 jump(player, dt);
             }
         }
+
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::R))
+        {
+            if (player.reset_check == 0)
+            {
+                player.x = player.start_pos_x;
+                player.y = player.start_pos_y;
+                player.vidas--;
+                player.reset_check = 1;
+            }
+        }
+        else
+        {
+            player.reset_check = 0;
+        }
     }
 
     // gravity
@@ -896,11 +911,6 @@ int main()
         {
             return 0;
         }
-
-        // ver posi�ao blocos
-
-        sf::Vector2i cursorPosition = sf::Mouse::getPosition(window);
-        printf("X: %d Y: %d\n", cursorPosition.x / 24 * 24, cursorPosition.y / 24 * 24);
 
         // DRAW
         window.clear();

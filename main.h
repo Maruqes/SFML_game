@@ -22,6 +22,7 @@ public:
     sf::Texture player_texture_idle;
     sf::Texture player_texture_atack;
     int vidas = 3;
+    int reset_check = 0;
     // Constructor
     Player(sf::Texture *player_texture_idlee, sf::Texture *player_texture_walkinge, sf::Texture *player_texture_atacke, int sX, int sY);
 
