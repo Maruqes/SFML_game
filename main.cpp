@@ -133,6 +133,17 @@ void change_sprite_player(Player &player)
 {
     if (player.atacking == 1)
     {
+        if (player.animation_frame == 8)
+        {
+            for (int i = 0; i < enemy_count; i++)
+            {
+                if (check_atack_enemies(player, enemy_array[i]) == true)
+                {
+                    break;
+                }
+            }
+        }
+
         player.sprite.setTexture(player.player_texture_atack);
         player.animation_frame++;
         if (player.animation_frame >= 18)
@@ -194,13 +205,7 @@ void atack(Player &player)
 
 
             printf("Atack\n");
-            for (int i = 0; i < enemy_count; i++)
-            {
-                if (check_atack_enemies(player, enemy_array[i]) == true)
-                {
-                    break;
-                }
-            }
+            
             player.animation_frame = 0;
             while(animatee)
             {
@@ -814,7 +819,7 @@ int main()
         // ver posiçao blocos
 
         sf::Vector2i cursorPosition = sf::Mouse::getPosition(window);
-        printf("X: %d Y: %d\n", cursorPosition.x / 24 * 24, cursorPosition.y / 24 * 24);
+        // printf("X: %d Y: %d\n", cursorPosition.x / 24 * 24, cursorPosition.y / 24 * 24);
 
         // DRAW
         window.clear();
