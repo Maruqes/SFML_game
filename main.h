@@ -21,6 +21,7 @@ public:
     sf::Texture player_texture_walking;
     sf::Texture player_texture_idle;
     sf::Texture player_texture_atack;
+    int vidas = 3;
     // Constructor
     Player(sf::Texture *player_texture_idlee, sf::Texture *player_texture_walkinge, sf::Texture *player_texture_atacke, int sX, int sY);
 
@@ -75,7 +76,7 @@ Ground::Ground(int x, int y, sf::Texture *ground_texturee)
 {
     sprite.setTexture(*ground_texturee);
     sprite.setPosition(x, y);
-    sprite.setTextureRect(sf::IntRect(336, 367, 32, 32));
+    sprite.setTextureRect(sf::IntRect(336, 367, 32, 16));
     sprite.setScale(1.5, 1.5);
 }
 

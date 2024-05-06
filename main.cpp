@@ -115,11 +115,11 @@ void jump(Player &player, float dt)
             clock.restart();
             while (clock.getElapsedTime().asSeconds() < 0.35)
             {
-                    if (check_collision(player.x, player.y - 500 * dt, player.width , player.height) == true)
-                    {
-                        printf("Colidiu\n");
-                        break;
-                    }
+                if (check_collision(player.x, player.y - 500 * dt, player.width, player.height) == true)
+                {
+                    printf("Colidiu\n");
+                    break;
+                }
 
                 player.y -= 500 * dt;
                 std::this_thread::sleep_for(std::chrono::milliseconds(20));
@@ -199,15 +199,15 @@ void atack(Player &player)
                    {
             sf::Clock clock;
             sf::Clock animation_clock;
-            bool animatee=true;
+            bool animatee = true;
             clock.restart();
             player.atacking = 1;
 
 
             printf("Atack\n");
-            
+
             player.animation_frame = 0;
-            while(animatee)
+            while (animatee)
             {
                 change_sprite_player(player);
                 if (animation_clock.getElapsedTime().asSeconds() > 0.7)
@@ -234,7 +234,7 @@ void player_move(Player &player, float dt)
 
     if (!player.atacking)
     {
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q))
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
         {
             if (check_collision(player.x - ((100 * dt * 2) * 5), player.y, player.width, player.height - 5) == false)
             {
@@ -243,7 +243,7 @@ void player_move(Player &player, float dt)
                 player.last_direction = 1;
             }
         }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
         {
             if (check_collision(player.x + ((100 * dt * 2) * 2), player.y, player.width, player.height - 5) == false)
             {
@@ -253,7 +253,7 @@ void player_move(Player &player, float dt)
             }
         }
 
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::E))
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
         {
             if (player.atacking == 0)
             {
@@ -261,7 +261,7 @@ void player_move(Player &player, float dt)
             }
         }
 
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
         {
             if (player.jumping == 0)
             {
@@ -301,6 +301,7 @@ void player_move(Player &player, float dt)
     {
         player.x = player.start_pos_x;
         player.y = player.start_pos_y;
+        player.vidas--;
     }
 }
 
@@ -390,7 +391,7 @@ Enemy start_enemy(float x, float y)
 
 void level_load1(Player &player, sf::Texture &ground_texture, sf::Texture &enemy_texture, sf::Texture &star_texture)
 {
-    int starting_pos[2] = {0, 0};
+    int starting_pos[2] = {50, 0};
     player.x = starting_pos[0];
     player.y = starting_pos[1];
     player.start_pos_x = starting_pos[0];
@@ -512,17 +513,16 @@ void level_load1(Player &player, sf::Texture &ground_texture, sf::Texture &enemy
     add_ground(ground_texture, 816, 528);
 
     add_enemy(enemy_texture, 672, 24, 0, 0);
-
-    add_enemy(enemy_texture, 480, 864, 0, 0);
+    add_enemy(enemy_texture, 420, 480, 4, 30);
 
     add_star(star_texture, 384, 30);
-    //  add_star(star_texture, 672, 186);
-    //  add_star(star_texture, 48, 620);
-    //  add_star(star_texture, 864, 456);
-    // add_star(star_texture, 720, 402);
-    //  add_star(star_texture, 720, 432);
-    //    add_star(star_texture, 672, 432);
-    //  add_star(star_texture, 672, 402);
+    add_star(star_texture, 600, 186);
+    add_star(star_texture, 48, 620);
+    add_star(star_texture, 864, 456);
+    add_star(star_texture, 600, 412);
+    add_star(star_texture, 648, 442);
+    add_star(star_texture, 600, 442);
+    add_star(star_texture, 648, 412);
 
     current_level = 1;
 }
@@ -575,11 +575,16 @@ void level_load2(Player &player, sf::Texture &ground_texture, sf::Texture &enemy
         add_ground(ground_texture, i * 24, 216);
     }
 
-    add_enemy(enemy_texture, 340, 120, 0, 0);
-    add_enemy(enemy_texture, 340, 432, 0, 0);
-    add_enemy(enemy_texture, 870, 312, 0, 0);
-    add_star(star_texture, 320, 192);
-    add_star(star_texture, 1000, 192);
+    add_enemy(enemy_texture, 420, 120, 0, 30);
+    add_enemy(enemy_texture, 430, 432, 2, 50);
+    add_enemy(enemy_texture, 850, 312, 4, 0);
+    add_star(star_texture, 456, 576);
+    add_star(star_texture, 72, 480);
+    add_star(star_texture, 456, 384);
+    add_star(star_texture, 864, 240);
+    add_star(star_texture, 432, 72);
+    add_star(star_texture, 24, 120);
+
     current_level = 2;
 }
 
@@ -595,21 +600,81 @@ void level_load3(Player &player, sf::Texture &ground_texture, sf::Texture &enemy
     background.loadFromFile("assets/background4b.png");
     background_sprite.setTexture(background);
 
-    add_ground(ground_texture, 0, 192);
-    add_ground(ground_texture, 64, 192);
-    add_ground(ground_texture, 128, 192);
-    add_ground(ground_texture, 64 * 4, 256);
-    add_ground(ground_texture, 64 * 5, 256);
-    add_ground(ground_texture, 64 * 6, 256);
-    add_ground(ground_texture, 64 * 7, 256);
-    add_ground(ground_texture, 64 * 8, 256);
-    add_ground(ground_texture, 64 * 9, 256);
-    add_ground(ground_texture, 64 * 10, 256);
+    for (int i = 0; i < 3; i++)
+    {
+        add_ground(ground_texture, i * 24, 168);
+    }
 
-    add_enemy(enemy_texture, 448, 170, 0, 0);
+    for (int i = -20; i < 15; i++)
+    {
+        add_ground(ground_texture, 192, i * 24);
+    }
 
-    add_star(star_texture, 320, 192);
-    add_star(star_texture, 640, 192);
+    for (int i = 0; i < 9; i++)
+    {
+        add_ground(ground_texture, i * 24, 768);
+    }
+    for (int i = 0; i < 9; i++)
+    {
+        add_ground(ground_texture, i * 24, 744);
+    }
+    for (int i = 0; i < 9; i++)
+    {
+        add_ground(ground_texture, i * 24, 792);
+    }
+
+    for (int i = 13; i < 17; i++)
+    {
+        add_ground(ground_texture, i * 24, 528);
+    }
+    for (int i = 0; i < 3; i++)
+    {
+        add_ground(ground_texture, i * 24, 168);
+    }
+    for (int i = 30; i < 45; i++)
+    {
+        add_ground(ground_texture, i * 24, 720);
+    }
+    for (int i = 38; i < 43; i++)
+    {
+        add_ground(ground_texture, i * 24, 528);
+    }
+
+    for (int i = 29; i < 33; i++)
+    {
+        add_ground(ground_texture, i * 24, 433);
+    }
+
+    for (int i = 38; i < 43; i++)
+    {
+        add_ground(ground_texture, i * 24, 338);
+    }
+    for (int i = 25; i < 33; i++)
+    {
+        add_ground(ground_texture, i * 24, 192);
+    }
+    for (int i = 9; i < 20; i++)
+    {
+        add_ground(ground_texture, i * 24, 144);
+    }
+    add_enemy(enemy_texture, 24, 650, 0, 0);
+    add_enemy(enemy_texture, 600, 120, 0, 0);
+    add_enemy(enemy_texture, 790, 650, 3, 30);
+    add_enemy(enemy_texture, 270, 100, 4, 0);
+
+    add_star(star_texture, 248, 72);
+    add_star(star_texture, 312, 72);
+    add_star(star_texture, 312, 240);
+    add_star(star_texture, 248, 72);
+    add_star(star_texture, 600, 120);
+    add_star(star_texture, 930, 264);
+    add_star(star_texture, 670, 360);
+    add_star(star_texture, 312, 240);
+    add_star(star_texture, 72, 384);
+    add_star(star_texture, 96, -40);
+    add_star(star_texture, 248, 72);
+    add_star(star_texture, 864, 648);
+
     current_level = 3;
 }
 
@@ -617,10 +682,10 @@ int main()
 {
     sf::RenderWindow window(
         sf::VideoMode(1024, 800),
-        "Nome do Jogo");
+        "Speed Star");
     window.setFramerateLimit(60);
 
-    float time_to_live_player = 50000;
+    float time_to_live_player = 65;
     int stars_found = 0;
 
     sf::CircleShape circle_player(4.f);
@@ -650,7 +715,7 @@ int main()
 
     time_life.restart();
 
-    level_load1(player, ground_texture, enemy_texture, star_texture);
+    level_load3(player, ground_texture, enemy_texture, star_texture);
     while (window.isOpen())
     {
         float dt = delta_clock.restart().asSeconds();
@@ -688,6 +753,7 @@ int main()
             {
                 player.x = player.start_pos_x;
                 player.y = player.start_pos_y;
+                player.vidas--;
             }
         }
 
@@ -715,6 +781,7 @@ int main()
 
                         stars_found = 0;
                         level_load2(player, ground_texture, enemy_texture, star_texture);
+                        time_life.restart();
                         continue;
                     }
 
@@ -734,28 +801,42 @@ int main()
 
                         stars_found = 0;
                         level_load3(player, ground_texture, enemy_texture, star_texture);
+                        time_life.restart();
                         continue;
                     }
                     else if (current_level == 3)
                     {
-                        enemy_count = 0;
-                        free(enemy_array);
-                        enemy_array = NULL;
-
-                        star_count = 0;
-                        free(star_array);
-                        star_array = NULL;
-
-                        ground_array_size = 0;
-                        free(ground_array);
-                        ground_array = NULL;
-
-                        stars_found = 0;
-                        level_load1(player, ground_texture, enemy_texture, star_texture);
-                        continue;
+                        // show "Vitoria"
+                        window.clear();
+                        sf::Text victoryText;
+                        victoryText.setFont(font);
+                        victoryText.setCharacterSize(48);
+                        victoryText.setFillColor(sf::Color::Green);
+                        victoryText.setString("Vitoria!");
+                        victoryText.setPosition(window.getSize().x / 2 - victoryText.getLocalBounds().width / 2, window.getSize().y / 2 - victoryText.getLocalBounds().height / 2);
+                        window.draw(victoryText);
+                        window.display();
+                        sf::sleep(sf::seconds(10)); // Display victory text for 3 seconds
+                        return 0;
                     }
                 }
             }
+        }
+
+        if (player.vidas == 0)
+        {
+            window.clear();
+            // show "Derrota"
+            sf::Text defeatText;
+            defeatText.setFont(font);
+            defeatText.setCharacterSize(48);
+            defeatText.setFillColor(sf::Color::Red);
+            defeatText.setString("Derrota!");
+            defeatText.setPosition(window.getSize().x / 2 - defeatText.getLocalBounds().width / 2, window.getSize().y / 2 - defeatText.getLocalBounds().height / 2);
+            window.draw(defeatText);
+            window.display();
+            sf::sleep(sf::seconds(10)); // Display defeat text for 3 seconds
+            return 0;
         }
 
         // move every sprite
@@ -810,16 +891,16 @@ int main()
         {
             timeString = timeString.substr(0, dotPos + 3);
         }
-        text.setString("Time: " + timeString);
+        text.setString("Time: " + timeString + "   Vidas: " + std::to_string(player.vidas) + "   Level: " + std::to_string(current_level) + "   Stars: " + std::to_string(stars_found) + "/" + std::to_string(star_count));
         if (time_to_live_player - time_life.getElapsedTime().asSeconds() < 0)
         {
             return 0;
         }
 
-        // ver posiçao blocos
+        // ver posi�ao blocos
 
         sf::Vector2i cursorPosition = sf::Mouse::getPosition(window);
-        // printf("X: %d Y: %d\n", cursorPosition.x / 24 * 24, cursorPosition.y / 24 * 24);
+        printf("X: %d Y: %d\n", cursorPosition.x / 24 * 24, cursorPosition.y / 24 * 24);
 
         // DRAW
         window.clear();
