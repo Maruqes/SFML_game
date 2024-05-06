@@ -1024,6 +1024,18 @@ int main()
         text.setString("Time: " + timeString + "   Vidas: " + std::to_string(player.vidas) + "   Level: " + std::to_string(current_level) + "   Stars: " + std::to_string(stars_found) + "/" + std::to_string(star_count));
         if (time_to_live_player - time_life.getElapsedTime().asSeconds() < 0)
         {
+            // tela derrota
+            window.clear();
+            sf::Text defeatText;
+            defeatText.setFont(font);
+            defeatText.setCharacterSize(48);
+            defeatText.setFillColor(sf::Color::Red);
+            defeatText.setString("Derrota!");
+            defeatText.setPosition(window.getSize().x / 2 - defeatText.getLocalBounds().width / 2, window.getSize().y / 2 - defeatText.getLocalBounds().height / 2);
+            window.draw(defeatText);
+            window.display();
+            sf::sleep(sf::seconds(10)); // Display defeat text for 3 seconds
+
             return 0;
         }
 
