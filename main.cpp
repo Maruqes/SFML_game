@@ -715,7 +715,7 @@ int main()
 
     time_life.restart();
 
-    level_load3(player, ground_texture, enemy_texture, star_texture);
+    level_load1(player, ground_texture, enemy_texture, star_texture);
     while (window.isOpen())
     {
         float dt = delta_clock.restart().asSeconds();
